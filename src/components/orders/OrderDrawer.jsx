@@ -1,0 +1,175 @@
+import { useEffect, useState } from 'react'
+import Drawer from '../ui/Drawer.jsx'
+import Button from '../ui/Button.jsx'
+import Field, { Input, Select } from '../ui/Field.jsx'
+import StatusBadge from './StatusBadge.jsx'
+import StatusPicker from './StatusPicker.jsx'
+import { updateOrder } from '../../api/orders.js'
+import { STATUS_COPY } from '../../api/endpoints.js'
+import { validateOrderUpdate } from '../../lib/validate.js'
+import { useToast } from '../../context/ToastContext.jsx'
+import { rupees, longDate } from '../../lib/format.js'
+
+const COURIERS = ['Delhivery', 'Shiprocket', 'Bluedart', 'DTDC', 'India Post', 'Other']
+
+export default function OrderDrawer({ order, onClose, onSaved }) {
+  const { toast } = useToast()
+  const [status, setStatus] = useState('placed')
+  const [courier, setCourier] = useState('')
+  const [tracking, setTracking] = useState('')
+  const [errors, setErrors] = useState({})
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    if (!order) return
+    setStatus(order.status)
+    setCourier(order.courier || '')
+    setTracking(order.trackingNumber || '')
+    setErrors({})
+  }, [order])
+
+  if (!order) return null
+
+  const needsTracking = ['shipped', 'out_for_delivery', 'delivered'].includes(status)
+  const changed =
+    status !== order.status || courier !== (order.courier || '') || tracking !== (order.trackingNumber || '')
+
+  const save = async () => {
+    const found = validateOrderUpdate({ status, courier, trackingNumber: tracking })
+    setErrors(found)
+    if (Object.keys(found).length) return
+
+    setBusy(true)
+    try {
+      const saved = await updateOrder(order.id, { status, courier, trackingNumber: tracking.trim() })
+      onSaved(saved)
+      toast(`${order.reference} marked ${STATUS_COPY[status].short.toLowerCase()}`)
+      onClose()
+    } catch (e) {
+      toast(e.message, 'error')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Drawer
+      open
+      onClose={onClose}
+      title={order.reference}
+      subtitle={`Placed ${longDate(order.createdAt)}`}
+      footer={
+        <Button onClick={save} loading={busy} disabled={!changed} size="block">
+          {changed ? 'Save and notify customer' : 'No changes to save'}
+        </Button>
+      }
+    >
+      <div className="px-5 py-5">
+        <div className="flex items-center justify-between">
+          <StatusBadge status={order.status} />
+          <span className="text-[13px] text-smoke">
+            {order.payment === 'upi' ? 'Paid by UPI' : 'Cash on delivery'}
+          </span>
+        </div>
+
+        <div className="mt-6">
+          <p className="label mb-2.5">Update status</p>
+          <StatusPicker current={order.status} value={status} onChange={setStatus} />
+        </div>
+
+        {needsTracking && (
+          <div className="mt-5 space-y-4 rounded-xl bg-ash p-4">
+            <p className="text-[13px] text-smoke">
+              The customer's tracking page shows both of these, so neither can be blank.
+            </p>
+            <Field label="Courier" id="courier" error={errors.courier}>
+              <Select id="courier" value={courier} invalid={errors.courier} onChange={(e) => setCourier(e.target.value)}>
+                <option value="">Select a courier</option>
+                {COURIERS.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Tracking number" id="tracking" error={errors.trackingNumber}>
+              <Input
+                id="tracking"
+                value={tracking}
+                invalid={errors.trackingNumber}
+                onChange={(e) => setTracking(e.target.value)}
+              />
+            </Field>
+          </div>
+        )}
+
+        <div className="rule my-6" />
+
+        <p className="label mb-3">Items</p>
+        <ul className="space-y-3">
+          {order.items.map((l) => (
+            <li key={l.key} className="flex items-center gap-3">
+              {l.image ? (
+                <img src={l.image} alt="" className="h-11 w-11 shrink-0 rounded-lg object-cover" />
+              ) : (
+                <span className="h-11 w-11 shrink-0 rounded-lg bg-ash" />
+              )}
+              <span className="min-w-0 flex-1 text-[14px] text-ink">
+                {l.name}
+                <span className="block text-[12px] text-smoke">
+                  {l.tierLabel} &times; {l.count}
+                </span>
+              </span>
+              <span className="shrink-0 text-[14px] tabular-nums text-ink">{rupees(l.unitPrice * l.count)}</span>
+            </li>
+          ))}
+        </ul>
+
+        <dl className="mt-5 space-y-1.5 border-t border-wick pt-4 text-[14px]">
+          <Row term="Subtotal" value={rupees(order.subtotal)} />
+          <Row term="Delivery" value={order.shipping === 0 ? 'Free' : rupees(order.shipping)} />
+          <div className="flex justify-between pt-1 font-display text-[17px] text-soot">
+            <dt>Total</dt>
+            <dd className="tabular-nums">{rupees(order.total)}</dd>
+          </div>
+        </dl>
+
+        <div className="rule my-6" />
+
+        <p className="label mb-2">Deliver to</p>
+        <address className="text-[14px] not-italic leading-relaxed text-ink">
+          {order.address.fullName || order.customer?.name}
+          <br />
+          {order.address.line1}
+          {order.address.line2 && (
+            <>
+              <br />
+              {order.address.line2}
+            </>
+          )}
+          <br />
+          {order.address.city} {order.address.pincode}
+          {order.address.phone && (
+            <>
+              <br />
+              <a href={`tel:+91${order.address.phone}`} className="text-ember underline underline-offset-4">
+                +91 {order.address.phone}
+              </a>
+            </>
+          )}
+        </address>
+        {order.customer?.email && <p className="mt-2 text-[13px] text-smoke">{order.customer.email}</p>}
+        {order.address.notes && (
+          <p className="mt-3 rounded-xl bg-ash px-3.5 py-2.5 text-[13px] italic text-ink">{order.address.notes}</p>
+        )}
+      </div>
+    </Drawer>
+  )
+}
+
+function Row({ term, value }) {
+  return (
+    <div className="flex justify-between">
+      <dt className="text-smoke">{term}</dt>
+      <dd className="tabular-nums text-ink">{value}</dd>
+    </div>
+  )
+}

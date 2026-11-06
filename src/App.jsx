@@ -8,6 +8,11 @@ import Orders from './pages/Orders.jsx'
 import Products from './pages/Products.jsx'
 import Security from './pages/Security.jsx'
 import Quotes from './pages/Quotes.jsx'
+import Production from './pages/Production.jsx'
+import Customers from './pages/Customers.jsx'
+import Materials from './pages/Materials.jsx'
+import Team from './pages/Team.jsx'
+import PrintOrder from './pages/PrintOrder.jsx'
 import NotFound from './pages/NotFound.jsx'
 import Flame from './components/ui/Flame.jsx'
 
@@ -30,11 +35,16 @@ function Gate() {
 
   return (
     <Routes>
+      <Route path="print/:id" element={<PrintOrder />} />
       <Route element={<Shell />}>
         <Route index element={<Dashboard />} />
         <Route path="orders" element={<Orders />} />
         <Route path="products" element={<Products />} />
         <Route path="quotes" element={<Quotes />} />
+        <Route path="production" element={<Production />} />
+        <Route path="customers" element={<Customers />} />
+        <Route path="materials" element={<Materials />} />
+        <Route path="team" element={<Team />} />
         <Route path="security" element={<Security />} />
         <Route path="*" element={<NotFound />} />
       </Route>

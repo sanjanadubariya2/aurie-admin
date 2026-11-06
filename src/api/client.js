@@ -60,13 +60,11 @@ async function send(path, { method = 'GET', body, isForm = false, quiet401 = fal
     }
   }
 
-  if ((res.status === 401 || res.status === 403) && !quiet401) {
+  // Only 401 means "signed out". A 403 is "signed in, but your role cannot do
+  // that" (staff on an owner-only action) — show the message, keep the session.
+  if (res.status === 401 && !quiet401) {
     expiryListeners.forEach((fn) => fn())
-    throw new ApiError(
-      res.status === 403 ? 'That account is not an admin.' : payload?.message || 'Your session expired. Sign in again.',
-      res.status,
-      payload,
-    )
+    throw new ApiError(payload?.message || 'Your session expired. Sign in again.', res.status, payload)
   }
   if (!res.ok) {
     throw new ApiError(payload?.message || payload?.error || `Request failed (${res.status})`, res.status, payload)

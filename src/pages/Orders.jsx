@@ -11,8 +11,11 @@ import Button from '../components/ui/Button.jsx'
 import { fetchOrders } from '../api/orders.js'
 import { STATUS_TABS } from '../api/endpoints.js'
 import { useDebounced } from '../hooks/useDebounced.js'
+import { useAdminAuth } from '../context/AdminAuthContext.jsx'
+import { exportUrl } from '../api/ops.js'
 
 export default function Orders() {
+  const { staff } = useAdminAuth()
   const [orders, setOrders] = useState(null)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('all')
@@ -64,9 +67,16 @@ export default function Orders() {
         title="Orders"
         subtitle={orders ? `${orders.length} total` : 'Loading'}
         action={
-          <Button variant="outline" size="sm" onClick={load}>
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            {staff?.role === 'admin' && (
+              <Button as="a" href={exportUrl()} variant="outline" size="sm" title="Last 31 days as a spreadsheet">
+                Export CSV
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={load}>
+              Refresh
+            </Button>
+          </div>
         }
       />
 

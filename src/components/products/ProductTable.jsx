@@ -1,7 +1,7 @@
 import Button from '../ui/Button.jsx'
 import { rupees, startingPrice } from '../../lib/format.js'
 
-export default function ProductTable({ products, collections, onEdit, onToggleStock, onDelete }) {
+export default function ProductTable({ products, collections, readOnly = false, onEdit, onToggleStock, onDelete }) {
   const collectionName = (id) => collections.find((c) => c.id === id)?.name || id
 
   return (
@@ -35,6 +35,10 @@ export default function ProductTable({ products, collections, onEdit, onToggleSt
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
+            {readOnly ? (
+              <span className="text-[12px] text-smoke">{p.inStock ? 'Live' : 'Hidden'}</span>
+            ) : (
+              <>
             <button
               onClick={() => onToggleStock(p)}
               title={p.inStock ? 'Hide from the storefront' : 'Show on the storefront'}
@@ -55,6 +59,8 @@ export default function ProductTable({ products, collections, onEdit, onToggleSt
                 <path d="M2 4h12M6 4V2h4v2M4 4l1 10h6l1-10" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
+              </>
+            )}
           </div>
         </li>
       ))}

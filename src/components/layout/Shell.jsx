@@ -29,7 +29,7 @@ export default function Shell() {
   return (
     <div className="min-h-screen lg:flex">
       <aside className="sticky top-0 hidden h-screen w-[220px] shrink-0 lg:block">
-        <Sidebar pending={pending} newQuotes={newQuotes} />
+        <Sidebar pending={pending} newQuotes={newQuotes} role={staff?.role} />
       </aside>
 
       <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-wick bg-ash/90 px-4 backdrop-blur-md lg:hidden">
@@ -55,7 +55,7 @@ export default function Shell() {
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 animate-fadeIn bg-soot/50" onClick={() => setMenuOpen(false)} />
           <div className="absolute left-0 top-0 h-full w-[240px] animate-fadeIn">
-            <Sidebar pending={pending} newQuotes={newQuotes} onNavigate={() => setMenuOpen(false)} />
+            <Sidebar pending={pending} newQuotes={newQuotes} role={staff?.role} onNavigate={() => setMenuOpen(false)} />
           </div>
         </div>
       )}

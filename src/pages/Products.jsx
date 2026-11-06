@@ -12,10 +12,13 @@ import { fetchProducts, updateProduct, deleteProduct } from '../api/products.js'
 import { fetchCollections, FALLBACK_COLLECTIONS } from '../api/collections.js'
 import { useToast } from '../context/ToastContext.jsx'
 import { useDebounced } from '../hooks/useDebounced.js'
+import { useAdminAuth } from '../context/AdminAuthContext.jsx'
 
 
 export default function Products() {
   const { toast } = useToast()
+  const { staff } = useAdminAuth()
+  const readOnly = staff?.role !== 'admin' // staff can look up products, only the owner changes them
   const [products, setProducts] = useState(null)
   const [COLLECTIONS, setCollections] = useState(FALLBACK_COLLECTIONS)
   const [error, setError] = useState('')
@@ -87,7 +90,7 @@ export default function Products() {
       <PageHeader
         title="Products"
         subtitle={products ? `${products.length} in the catalogue` : 'Loading'}
-        action={<Button onClick={() => setEditing({})}>Add a candle</Button>}
+        action={!readOnly && <Button onClick={() => setEditing({})}>Add a candle</Button>}
       />
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -117,12 +120,13 @@ export default function Products() {
           <EmptyState
             title="Nothing here"
             body={products.length === 0 ? 'Run the seed script in aurie-api, or add a candle by hand.' : 'No products match that filter.'}
-            action={<Button onClick={() => setEditing({})}>Add a candle</Button>}
+            action={!readOnly && <Button onClick={() => setEditing({})}>Add a candle</Button>}
           />
         ) : (
           <ProductTable
             products={visible}
             collections={COLLECTIONS}
+            readOnly={readOnly}
             onEdit={setEditing}
             onToggleStock={toggleStock}
             onDelete={setDeleting}

@@ -10,6 +10,10 @@ import { STATUS_COPY, paymentLabel } from '../../api/endpoints.js'
 import { validateOrderUpdate } from '../../lib/validate.js'
 import { useToast } from '../../context/ToastContext.jsx'
 import { rupees, longDate } from '../../lib/format.js'
+import { useAdminAuth } from '../../context/AdminAuthContext.jsx'
+import { useSettings } from '../../hooks/useSettings.js'
+import { refundOrder, bookShipment } from '../../api/ops.js'
+import { normaliseOrder } from '../../api/endpoints.js'
 
 const COURIERS = ['Delhivery', 'Shiprocket', 'Bluedart', 'DTDC', 'India Post', 'Other']
 
@@ -21,6 +25,10 @@ export default function OrderDrawer({ order, onClose, onSaved }) {
   const [errors, setErrors] = useState({})
   const [busy, setBusy] = useState(false)
   const [confirmCancel, setConfirmCancel] = useState(false)
+  const { staff } = useAdminAuth()
+  const settings = useSettings()
+  const isOwner = staff?.role === 'admin'
+  const [refund, setRefund] = useState({ open: false, amount: '', reason: '' })
 
   useEffect(() => {
     if (!order) return
@@ -195,6 +203,101 @@ export default function OrderDrawer({ order, onClose, onSaved }) {
           </div>
         </dl>
 
+        {order.refunds?.length > 0 && (
+          <ul className="mt-3 space-y-1 rounded-xl bg-ash p-3 text-[13px]">
+            {order.refunds.map((r) => (
+              <li key={r.refundId} className="flex justify-between gap-3">
+                <span className="text-ink">
+                  Refund {rupees(r.amount)} · {r.reason}
+                </span>
+                <span className={r.status === 'failed' ? 'text-ember' : 'text-smoke'}>{r.status}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {isOwner && order.payment === 'upi' && ['paid', 'partially_refunded'].includes(order.paymentStatus) && (
+          <div className="mt-4">
+            {!refund.open ? (
+              <button onClick={() => setRefund({ open: true, amount: '', reason: '' })} className="text-[13px] text-smoke underline underline-offset-4 hover:text-ember">
+                Refund money…
+              </button>
+            ) : (
+              <div className="space-y-3 rounded-xl border border-wick p-4">
+                <p className="text-[13px] text-ink">
+                  Up to {rupees(order.total - (order.refundedTotal || 0))} back to the customer's UPI account via Razorpay (5–7 working days).
+                </p>
+                <div className="grid grid-cols-[110px_1fr] gap-3">
+                  <Input aria-label="Amount" inputMode="numeric" placeholder="All" value={refund.amount} onChange={(e) => setRefund({ ...refund, amount: e.target.value.replace(/\D/g, '') })} />
+                  <Input aria-label="Reason" placeholder="Reason (customer sees it)" value={refund.reason} onChange={(e) => setRefund({ ...refund, reason: e.target.value })} />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    loading={busy}
+                    disabled={refund.reason.trim().length < 3}
+                    onClick={async () => {
+                      setBusy(true)
+                      try {
+                        const saved = normaliseOrder(await refundOrder(order.id, { amount: Number(refund.amount) || undefined, reason: refund.reason.trim() }))
+                        onSaved(saved)
+                        toast(`Refund started for ${order.reference}`)
+                        setRefund({ open: false, amount: '', reason: '' })
+                      } catch (e) {
+                        toast(e.message, 'error')
+                      } finally {
+                        setBusy(false)
+                      }
+                    }}
+                  >
+                    Refund {refund.amount ? rupees(Number(refund.amount)) : 'all'}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setRefund({ ...refund, open: false })}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button as="a" href={`/print/${order.id}?doc=slip`} target="_blank" rel="noreferrer" size="sm" variant="outline">
+            Packing slip
+          </Button>
+          {order.invoiceNumber && (
+            <Button as="a" href={`/print/${order.id}?doc=invoice`} target="_blank" rel="noreferrer" size="sm" variant="outline">
+              Invoice {order.invoiceNumber}
+            </Button>
+          )}
+          {settings.features?.shiprocket && order.status === 'confirmed' && !order.shiprocket?.awb && (
+            <Button
+              size="sm"
+              loading={busy}
+              onClick={async () => {
+                setBusy(true)
+                try {
+                  const saved = normaliseOrder(await bookShipment(order.id))
+                  onSaved(saved)
+                  toast(`Booked with ${saved.courier} · AWB ${saved.trackingNumber}`)
+                } catch (e) {
+                  toast(e.message, 'error')
+                } finally {
+                  setBusy(false)
+                }
+              }}
+            >
+              Book with Shiprocket
+            </Button>
+          )}
+          {order.shiprocket?.labelUrl && (
+            <Button as="a" href={order.shiprocket.labelUrl} target="_blank" rel="noreferrer" size="sm" variant="outline">
+              Shipping label
+            </Button>
+          )}
+        </div>
+
         <div className="rule my-6" />
 
         <p className="label mb-2">Deliver to</p>
@@ -229,7 +332,9 @@ export default function OrderDrawer({ order, onClose, onSaved }) {
         title={`Cancel ${order.reference}?`}
         body={
           order.payment === 'upi' && order.paymentStatus === 'paid'
-            ? 'The customer is emailed that it is cancelled. This was paid by UPI — refund it from the Razorpay dashboard; this panel does not move money.'
+            ? isOwner
+              ? 'The customer is emailed that it is cancelled. It was paid by UPI — use "Refund money" afterwards to send it back.'
+              : 'The customer is emailed that it is cancelled. It was paid by UPI — ask the owner to refund it.'
             : 'The customer is emailed that it is cancelled. This cannot be undone.'
         }
         confirmLabel="Cancel order"

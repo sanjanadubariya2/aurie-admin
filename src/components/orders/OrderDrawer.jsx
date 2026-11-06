@@ -118,6 +118,20 @@ export default function OrderDrawer({ order, onClose, onSaved }) {
           </p>
         )}
 
+        {(order.neededBy || order.gift?.wrap || order.gift?.note || order.gift?.hidePrices || order.quote) && (
+          <div className="mt-5 space-y-2 rounded-xl border border-glow/60 bg-glow/10 p-4 text-[14px] text-ink">
+            {order.neededBy && (
+              <p>
+                <span className="font-medium">Needed by {longDate(order.neededBy)}</span> — the customer has an occasion.
+              </p>
+            )}
+            {order.gift?.wrap && <p>🎁 Gift wrap</p>}
+            {order.gift?.hidePrices && <p>No prices on the packing slip</p>}
+            {order.gift?.note && <p className="italic">Card: “{order.gift.note}”</p>}
+            {order.quote && <p>Custom order — paid from a quote.</p>}
+          </div>
+        )}
+
         {!closed && !unpaid && (
           <div className="mt-6">
             <p className="label mb-2.5">Update status</p>
@@ -174,6 +188,7 @@ export default function OrderDrawer({ order, onClose, onSaved }) {
         <dl className="mt-5 space-y-1.5 border-t border-wick pt-4 text-[14px]">
           <Row term="Subtotal" value={rupees(order.subtotal)} />
           <Row term="Delivery" value={order.shipping === 0 ? 'Free' : rupees(order.shipping)} />
+          {order.giftWrapFee > 0 && <Row term="Gift wrap" value={rupees(order.giftWrapFee)} />}
           <div className="flex justify-between pt-1 font-display text-[17px] text-soot">
             <dt>Total</dt>
             <dd className="tabular-nums">{rupees(order.total)}</dd>

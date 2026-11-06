@@ -4,11 +4,12 @@ import Flame from '../ui/Flame.jsx'
 const items = [
   { to: '/', end: true, label: 'Dashboard', d: 'M2 8L9 2l7 6v8H2V8Z' },
   { to: '/orders', label: 'Orders', d: 'M3 4h12v12H3V4Zm0 4h12M7 4v12' },
+  { to: '/quotes', label: 'Requests', d: 'M3 3h12v9H8l-4 3v-3H3V3Zm3 4h6M6 9.5h4' },
   { to: '/products', label: 'Products', d: 'M9 2l7 4v8l-7 4-7-4V6l7-4Zm0 0v16M2 6l7 4 7-4' },
   { to: '/security', label: 'Security', d: 'M9 2l6 2.5v4.5c0 4-2.6 6.6-6 8-3.4-1.4-6-4-6-8V4.5L9 2Zm-2.5 7.5L8.5 11.5l3-3.5' },
 ]
 
-export default function Sidebar({ pending, onNavigate }) {
+export default function Sidebar({ pending, newQuotes = 0, onNavigate }) {
   return (
     <div className="flex h-full flex-col bg-soot px-4 py-6 text-wax">
       <div className="flex items-center gap-2 px-2">
@@ -33,6 +34,11 @@ export default function Sidebar({ pending, onNavigate }) {
               <path d={item.d} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {item.label}
+            {item.label === 'Requests' && newQuotes > 0 && (
+              <span className="ml-auto grid h-5 min-w-[20px] place-items-center rounded-full bg-glow px-1 text-[11px] tabular-nums text-soot">
+                {newQuotes}
+              </span>
+            )}
             {item.label === 'Orders' && pending > 0 && (
               <span className="ml-auto grid h-5 min-w-[20px] place-items-center rounded-full bg-ember px-1 text-[11px] tabular-nums text-wax">
                 {pending}

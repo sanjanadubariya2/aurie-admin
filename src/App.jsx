@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import Orders from './pages/Orders.jsx'
 import Products from './pages/Products.jsx'
 import Security from './pages/Security.jsx'
+import Quotes from './pages/Quotes.jsx'
 import NotFound from './pages/NotFound.jsx'
 import Flame from './components/ui/Flame.jsx'
 
@@ -33,6 +34,7 @@ function Gate() {
         <Route index element={<Dashboard />} />
         <Route path="orders" element={<Orders />} />
         <Route path="products" element={<Products />} />
+        <Route path="quotes" element={<Quotes />} />
         <Route path="security" element={<Security />} />
         <Route path="*" element={<NotFound />} />
       </Route>

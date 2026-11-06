@@ -32,6 +32,7 @@ export const PATHS = {
   productImage: (id) => `/admin/products/${id}/image`,
 
   stats: '/admin/stats',
+  collections: '/admin/collections',
 }
 
 // ------------------------------------------------------- response unwrapping
@@ -66,6 +67,7 @@ export const normaliseProduct = (p = {}) => ({
   image: p.image || p.imageUrl || p.imageURL || '',
   tiers: Array.isArray(p.tiers) ? p.tiers : [],
   inStock: p.inStock !== false,
+  quote: Boolean(p.quote),
 })
 
 export const normaliseOrder = (o = {}) => ({
@@ -89,7 +91,12 @@ export const normaliseOrder = (o = {}) => ({
   total: o.total ?? 0,
   subtotal: o.subtotal ?? o.total ?? 0,
   shipping: o.shipping ?? 0,
-  payment: o.payment || o.paymentMethod || 'cod',
+  // aurie-api's raw order doc has `payment: { method: 'upi' | 'cod' }`, not a
+  // flat string — every `order.payment === 'upi'` check in this app was
+  // comparing an object to a string and always landing on the COD branch.
+  payment: (typeof o.payment === 'object' && o.payment !== null ? o.payment.method : o.payment) || o.paymentMethod || 'cod',
+  // Mock orders have no paymentStatus; treat their UPI as paid like before.
+  paymentStatus: o.paymentStatus || (o.payment === 'upi' ? 'paid' : 'pending'),
   createdAt: o.createdAt || o.placedAt || new Date().toISOString(),
 })
 
@@ -132,4 +139,13 @@ export const STATUS_COPY = {
   shipped: { title: 'Shipped', short: 'Shipped', body: 'Handed to the courier with a tracking number.' },
   out_for_delivery: { title: 'Out for delivery', short: 'Out for delivery', body: 'Arriving today.' },
   delivered: { title: 'Delivered', short: 'Delivered', body: 'Order complete.' },
+  cancelled: { title: 'Cancelled', short: 'Cancelled', body: 'Will not be fulfilled.' },
+  awaiting_payment: { title: 'Awaiting payment', short: 'Unpaid', body: 'UPI payment never confirmed.' },
 }
+
+/** Tabs on the Orders page — the flow plus cancelled. */
+export const STATUS_TABS = [...STATUS_FLOW, 'cancelled']
+
+/** "Paid by UPI" only when Razorpay actually confirmed it. */
+export const paymentLabel = (o) =>
+  o.payment === 'upi' ? (o.paymentStatus === 'paid' ? 'Paid by UPI' : 'UPI — not confirmed') : 'Cash on delivery'

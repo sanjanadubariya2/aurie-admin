@@ -28,7 +28,9 @@ export default function OrderTable({ orders, onOpen }) {
 
               <span className="text-[14px] tabular-nums text-ink">
                 {rupees(o.total)}
-                <span className="ml-1.5 text-[12px] uppercase text-smoke">{o.payment === 'upi' ? 'UPI' : 'COD'}</span>
+                <span className="ml-1.5 text-[12px] uppercase text-smoke">
+                  {o.payment === 'upi' ? (o.paymentStatus === 'paid' ? 'UPI' : 'UPI unpaid') : 'COD'}
+                </span>
               </span>
 
               <span className="mt-1 md:mt-0">

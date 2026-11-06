@@ -13,7 +13,11 @@ import { fetchOrders } from './orders.js'
 const DAYS = 14
 
 /** Computed client-side. Correct as long as the orders list is not paginated. */
-export function deriveStats(orders) {
+export function deriveStats(allOrders) {
+  // Same rule as the API: cancelled orders and unconfirmed UPI are not revenue.
+  const orders = allOrders.filter(
+    (o) => !['cancelled', 'awaiting_payment'].includes(o.status) && (o.payment !== 'upi' || o.paymentStatus === 'paid'),
+  )
   const cutoff = Date.now() - DAYS * 864e5
   const recent = orders.filter((o) => new Date(o.createdAt).getTime() >= cutoff)
   const basis = recent.length ? recent : orders

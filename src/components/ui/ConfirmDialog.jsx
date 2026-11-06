@@ -1,7 +1,7 @@
 import Modal from './Modal.jsx'
 import Button from './Button.jsx'
 
-export default function ConfirmDialog({ open, title, body, confirmLabel, onConfirm, onCancel, busy }) {
+export default function ConfirmDialog({ open, title, body, confirmLabel, cancelLabel = 'Cancel', onConfirm, onCancel, busy }) {
   return (
     <Modal open={open} onClose={onCancel} title={title} size="sm">
       <div className="p-7">
@@ -12,7 +12,7 @@ export default function ConfirmDialog({ open, title, body, confirmLabel, onConfi
             {confirmLabel}
           </Button>
           <Button variant="ghost" onClick={onCancel}>
-            Cancel
+            {cancelLabel}
           </Button>
         </div>
       </div>

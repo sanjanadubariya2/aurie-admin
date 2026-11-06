@@ -6,6 +6,8 @@ const tones = {
   shipped: 'bg-sea/15 text-sea',
   out_for_delivery: 'bg-sea/15 text-sea',
   delivered: 'bg-soot/10 text-smoke',
+  cancelled: 'bg-soot/5 text-smoke line-through',
+  awaiting_payment: 'bg-soot/5 text-smoke',
 }
 
 export default function StatusBadge({ status }) {

@@ -12,8 +12,19 @@ export async function fetchOrders() {
     await delay(400)
     return mockOrders().map(normaliseOrder)
   }
-  const body = await get(PATHS.orders)
-  return unwrapList(body, 'orders').map(normaliseOrder)
+  // The API pages its results (100 max per page). Asking once returned only
+  // the newest 25, so older orders silently vanished from every screen.
+  const PAGE = 100
+  const all = []
+  for (let page = 1; page <= 50; page++) {
+    // eslint-disable-next-line no-await-in-loop
+    const body = await get(`${PATHS.orders}?page=${page}&limit=${PAGE}`)
+    const batch = unwrapList(body, 'orders')
+    all.push(...batch)
+    const total = typeof body?.total === 'number' ? body.total : null
+    if (batch.length < PAGE || (total !== null && all.length >= total)) break
+  }
+  return all.map(normaliseOrder)
 }
 
 export async function updateOrder(id, changes) {

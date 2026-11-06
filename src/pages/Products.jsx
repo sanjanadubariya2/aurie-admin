@@ -9,24 +9,15 @@ import { RowSkeleton } from '../components/ui/Skeleton.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import ErrorNotice from '../components/ui/ErrorNotice.jsx'
 import { fetchProducts, updateProduct, deleteProduct } from '../api/products.js'
+import { fetchCollections, FALLBACK_COLLECTIONS } from '../api/collections.js'
 import { useToast } from '../context/ToastContext.jsx'
 import { useDebounced } from '../hooks/useDebounced.js'
 
-/** Mirrors the storefront's collection list. Keep the ids identical. */
-const COLLECTIONS = [
-  { id: 'festive', name: 'Festive' },
-  { id: 'bloom', name: 'Bloom' },
-  { id: 'brew', name: 'Brew & Glow' },
-  { id: 'tide', name: 'Tide' },
-  { id: 'whims', name: 'Whims' },
-  { id: 'jars', name: 'Jars' },
-  { id: 'secret', name: 'Secret Glow' },
-  { id: 'luxe', name: 'Luxe Boxes' },
-]
 
 export default function Products() {
   const { toast } = useToast()
   const [products, setProducts] = useState(null)
+  const [COLLECTIONS, setCollections] = useState(FALLBACK_COLLECTIONS)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('all')
   const [query, setQuery] = useState('')
@@ -45,6 +36,9 @@ export default function Products() {
   }, [])
 
   useEffect(load, [load])
+  useEffect(() => {
+    fetchCollections().then(setCollections)
+  }, [])
 
   const visible = useMemo(() => {
     if (!products) return []

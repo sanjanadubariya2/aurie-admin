@@ -27,7 +27,7 @@ export default function ProductTable({ products, collections, onEdit, onToggleSt
 
           <div className="hidden shrink-0 text-right sm:block">
             <p className="text-[15px] tabular-nums text-soot">
-              {startingPrice(p) === null ? 'Quoted' : rupees(startingPrice(p))}
+              {p.quote || startingPrice(p) === null ? 'Quoted' : rupees(startingPrice(p))}
             </p>
             <p className="text-[12px] text-smoke">
               {p.tiers.length} {p.tiers.length === 1 ? 'size' : 'sizes'}

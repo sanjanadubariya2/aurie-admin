@@ -4,8 +4,10 @@ export function validateProduct(p) {
   const e = {}
   if (!p.name?.trim()) e.name = 'Give it a name'
   if (!p.collection) e.collection = 'Pick a collection'
-  if (!p.tiers?.length) e.tiers = 'Add at least one size'
-  else if (p.tiers.some((t) => !(t.price > 0))) e.tiers = 'Every size needs a price above zero'
+  // Quote-only products (Secret Glow, Luxe boxes) have no fixed sizes — they
+  // are priced on WhatsApp — so requiring a size made them impossible to edit.
+  if (!p.quote && !p.tiers?.length) e.tiers = 'Add at least one size, or tick "Priced on request"'
+  else if (p.tiers?.some((t) => !(t.price > 0))) e.tiers = 'Every size needs a price above zero'
   return e
 }
 

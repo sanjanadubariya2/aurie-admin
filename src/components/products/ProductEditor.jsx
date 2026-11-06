@@ -23,6 +23,7 @@ const blank = {
   burn: '',
   blurb: '',
   badge: '',
+  quote: false,
   inStock: true,
   tiers: [{ id: 'single', label: 'Single', qty: 1, price: 199 }],
 }
@@ -44,7 +45,10 @@ export default function ProductEditor({ product, collections, onClose, onSaved }
   useEffect(() => {
     setDraft(product?.id ? { ...blank, ...product } : { ...blank, collection: collections[0]?.id || '' })
     setErrors({})
-  }, [product, collections])
+    // Only when a different product is opened — collections load in the
+    // background and must not reset a form someone is halfway through.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product])
 
   const set = (field) => (e) => setDraft((d) => ({ ...d, [field]: e.target.value }))
 
@@ -178,8 +182,20 @@ export default function ProductEditor({ product, collections, onClose, onSaved }
           </div>
 
           <p className="mt-2.5 text-[13px] text-smoke">
-            Storefront shows {rupees(lowest)} as the starting price.
+            {draft.quote
+              ? 'Priced on request — the storefront shows "Ask for a quote" (WhatsApp) instead of a price.'
+              : `Storefront shows ${rupees(lowest)} as the starting price.`}
           </p>
+
+          <label className="mt-3 flex items-center gap-2.5 text-[14px] text-ink">
+            <input
+              type="checkbox"
+              checked={Boolean(draft.quote)}
+              onChange={(e) => setDraft((d) => ({ ...d, quote: e.target.checked }))}
+              className="h-4 w-4 accent-[#C1441E]"
+            />
+            Priced on request (Secret Glow, hampers) — no cart button
+          </label>
         </div>
 
         <label className="mt-6 flex items-center gap-2.5 text-[14px] text-ink">

@@ -1,4 +1,4 @@
-import { STATUS_FLOW, STATUS_COPY } from '../../api/endpoints.js'
+import { STATUS_TABS, STATUS_COPY } from '../../api/endpoints.js'
 
 export default function StatusTabs({ active, counts, onChange }) {
   return (
@@ -6,7 +6,7 @@ export default function StatusTabs({ active, counts, onChange }) {
       <Tab active={active === 'all'} count={counts.all} onClick={() => onChange('all')}>
         All
       </Tab>
-      {STATUS_FLOW.map((s) => (
+      {STATUS_TABS.map((s) => (
         <Tab key={s} active={active === s} count={counts[s]} onClick={() => onChange(s)}>
           {STATUS_COPY[s].short}
         </Tab>

@@ -9,7 +9,7 @@ import EmptyState from '../components/ui/EmptyState.jsx'
 import ErrorNotice from '../components/ui/ErrorNotice.jsx'
 import Button from '../components/ui/Button.jsx'
 import { fetchOrders } from '../api/orders.js'
-import { STATUS_FLOW } from '../api/endpoints.js'
+import { STATUS_TABS } from '../api/endpoints.js'
 import { useDebounced } from '../hooks/useDebounced.js'
 
 export default function Orders() {
@@ -33,7 +33,7 @@ export default function Orders() {
 
   const counts = useMemo(() => {
     const c = { all: orders?.length || 0 }
-    STATUS_FLOW.forEach((s) => {
+    STATUS_TABS.forEach((s) => {
       c[s] = orders?.filter((o) => o.status === s).length || 0
     })
     return c

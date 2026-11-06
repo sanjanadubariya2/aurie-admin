@@ -17,7 +17,7 @@ export async function fetchOrders() {
   const PAGE = 100
   const all = []
   for (let page = 1; page <= 50; page++) {
-    // eslint-disable-next-line no-await-in-loop
+     
     const body = await get(`${PATHS.orders}?page=${page}&limit=${PAGE}`)
     const batch = unwrapList(body, 'orders')
     all.push(...batch)

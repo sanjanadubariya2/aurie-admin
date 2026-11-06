@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar.jsx'
+import ErrorBoundary from '../ErrorBoundary.jsx'
 import Flame from '../ui/Flame.jsx'
 import { useAdminAuth } from '../../context/AdminAuthContext.jsx'
 import { fetchOrders } from '../../api/orders.js'
@@ -78,7 +79,9 @@ export default function Shell() {
               </Link>
             </div>
           )}
-          <Outlet />
+          <ErrorBoundary resetKey={location.pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

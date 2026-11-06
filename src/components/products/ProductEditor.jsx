@@ -48,7 +48,7 @@ export default function ProductEditor({ product, collections, onClose, onSaved }
     setErrors({})
     // Only when a different product is opened — collections load in the
     // background and must not reset a form someone is halfway through.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [product])
 
   const set = (field) => (e) => setDraft((d) => ({ ...d, [field]: e.target.value }))

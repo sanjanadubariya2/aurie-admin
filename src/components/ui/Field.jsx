@@ -1,3 +1,5 @@
+import { forwardRef } from 'react'
+
 export default function Field({ label, hint, error, id, className = '', children }) {
   return (
     <div className={className}>
@@ -16,15 +18,16 @@ export default function Field({ label, hint, error, id, className = '', children
   )
 }
 
-export function Input({ invalid, className = '', ...props }) {
+export const Input = forwardRef(function Input({ invalid, className = '', ...props }, ref) {
   return (
     <input
+      ref={ref}
       className={`h-11 w-full rounded-xl border bg-wax px-3.5 text-[15px] text-ink placeholder:text-smoke/60
         focus:outline-none focus-visible:border-ember ${invalid ? 'border-ember' : 'border-wick'} ${className}`}
       {...props}
     />
   )
-}
+})
 
 export function Textarea({ className = '', ...props }) {
   return (

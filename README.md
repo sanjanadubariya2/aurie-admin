@@ -53,7 +53,10 @@ What it currently assumes:
 
 | Method | Path | Body | Response |
 | --- | --- | --- | --- |
-| POST | `/admin/login` | `{ email, password }` | `{ token, admin }` |
+| POST | `/admin/login` | `{ email, password, code? }` | `{ admin }` + `aurie_admin` cookie; 401 `{ needsTotp }` |
+| POST | `/admin/logout` | | clears the cookie |
+| POST | `/admin/2fa/setup` · `/enable` · `/disable` | | two-factor management (Security page) |
+| GET | `/admin/collections` | | `{ collections }` |
 | GET | `/admin/me` | | `{ admin }` |
 | GET | `/admin/orders` | | `{ orders: [...] }` |
 | PATCH | `/admin/orders/:id` | `{ status, courier, trackingNumber }` | `{ order }` |
@@ -94,9 +97,13 @@ about what state an order is in.
 `laddoo`. If Mongoose is generating ObjectIds instead, the normaliser handles
 display fine, but make sure `seed.js` is consistent about which one it writes.
 
-**CORS in production.** The dev proxy hides this. When you deploy, either serve
-the admin build from the same origin as the API, or add its origin to the API's
-`cors()` allowlist. The `Authorization` header must be in `allowedHeaders`.
+**Sessions and CORS in production.** The admin session is an httpOnly cookie,
+so the API must be same-site with the admin: host it at `admin.aurie.website`
+with the API at `api.aurie.website`, set `VITE_API_URL=https://api.aurie.website/api`,
+and keep `https://admin.aurie.website` in the API's `CORS_ORIGIN`.
+
+**Two-factor.** The Security page pairs an authenticator app. Until it is on, a
+banner on every page says so.
 
 ## Design
 

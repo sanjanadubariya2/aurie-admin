@@ -1,17 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import * as authApi from '../api/auth.js'
-import { getToken, onSessionExpired } from '../api/client.js'
+import { onSessionExpired } from '../api/client.js'
 
 const AdminAuthContext = createContext(null)
 
 export function AdminAuthProvider({ children }) {
   const [staff, setStaff] = useState(null)
-  const [checking, setChecking] = useState(Boolean(getToken()))
+  const [checking, setChecking] = useState(true)
 
-  // A stored token might be expired or revoked. Verify it before showing the
-  // dashboard, otherwise every panel loads and then fails at once.
+  // The session is a cookie this page cannot see, so ask the API once on load.
   useEffect(() => {
-    if (!getToken()) return
     let cancelled = false
     authApi
       .fetchMe()
@@ -26,20 +24,22 @@ export function AdminAuthProvider({ children }) {
   // Any 401/403 from anywhere in the app drops us back to the login screen.
   useEffect(() => onSessionExpired(() => setStaff(null)), [])
 
-  const signIn = useCallback(async (email, password) => {
-    const s = await authApi.login(email, password)
+  const signIn = useCallback(async (email, password, code) => {
+    const s = await authApi.login(email, password, code)
     setStaff(s)
     return s
   }, [])
 
-  const signOut = useCallback(() => {
-    authApi.logout()
+  const signOut = useCallback(async () => {
     setStaff(null)
+    await authApi.logout()
   }, [])
 
+  const refresh = useCallback(async () => setStaff(await authApi.fetchMe()), [])
+
   const value = useMemo(
-    () => ({ staff, checking, signIn, signOut, isSignedIn: Boolean(staff) }),
-    [staff, checking, signIn, signOut],
+    () => ({ staff, checking, signIn, signOut, refresh, isSignedIn: Boolean(staff) }),
+    [staff, checking, signIn, signOut, refresh],
   )
 
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>

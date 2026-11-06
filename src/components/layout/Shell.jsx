@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar.jsx'
 import Flame from '../ui/Flame.jsx'
 import { useAdminAuth } from '../../context/AdminAuthContext.jsx'
@@ -63,6 +63,16 @@ export default function Shell() {
           </button>
         </div>
         <main className="px-4 pb-24 pt-6 sm:px-6 lg:px-8">
+          {staff && staff.totpEnabled === false && location.pathname !== '/security' && (
+            <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-ember/30 bg-ember/[0.06] px-4 py-3 text-[14px] text-ink">
+              <span>
+                <span className="font-medium">Two-factor sign-in is off.</span> Anyone with your password can get in.
+              </span>
+              <Link to="/security" className="ml-auto rounded-full bg-soot px-3.5 py-1.5 text-[13px] text-wax">
+                Turn it on
+              </Link>
+            </div>
+          )}
           <Outlet />
         </main>
       </div>

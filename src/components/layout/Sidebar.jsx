@@ -5,6 +5,7 @@ const items = [
   { to: '/', end: true, label: 'Dashboard', d: 'M2 8L9 2l7 6v8H2V8Z' },
   { to: '/orders', label: 'Orders', d: 'M3 4h12v12H3V4Zm0 4h12M7 4v12' },
   { to: '/products', label: 'Products', d: 'M9 2l7 4v8l-7 4-7-4V6l7-4Zm0 0v16M2 6l7 4 7-4' },
+  { to: '/security', label: 'Security', d: 'M9 2l6 2.5v4.5c0 4-2.6 6.6-6 8-3.4-1.4-6-4-6-8V4.5L9 2Zm-2.5 7.5L8.5 11.5l3-3.5' },
 ]
 
 export default function Sidebar({ pending, onNavigate }) {

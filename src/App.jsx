@@ -13,6 +13,8 @@ import Customers from './pages/Customers.jsx'
 import Materials from './pages/Materials.jsx'
 import Team from './pages/Team.jsx'
 import PrintOrder from './pages/PrintOrder.jsx'
+import Coupons from './pages/Coupons.jsx'
+import Reviews from './pages/Reviews.jsx'
 import NotFound from './pages/NotFound.jsx'
 import Flame from './components/ui/Flame.jsx'
 
@@ -45,6 +47,8 @@ function Gate() {
         <Route path="customers" element={<Customers />} />
         <Route path="materials" element={<Materials />} />
         <Route path="team" element={<Team />} />
+        <Route path="coupons" element={<Coupons />} />
+        <Route path="reviews" element={<Reviews />} />
         <Route path="security" element={<Security />} />
         <Route path="*" element={<NotFound />} />
       </Route>

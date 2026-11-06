@@ -3,6 +3,7 @@ import Modal from '../ui/Modal.jsx'
 import Button from '../ui/Button.jsx'
 import Field, { Input, Textarea, Select } from '../ui/Field.jsx'
 import ImageUploader from './ImageUploader.jsx'
+import { WriteProductCopy } from '../ai/AiTools.jsx'
 import { createProduct, updateProduct } from '../../api/products.js'
 import { validateProduct } from '../../lib/validate.js'
 import { useToast } from '../../context/ToastContext.jsx'
@@ -115,6 +116,20 @@ export default function ProductEditor({ product, collections, onClose, onSaved }
             <Input id="p-name" value={draft.name} invalid={errors.name} onChange={set('name')} />
           </Field>
 
+          <div className="sm:col-span-2">
+            <WriteProductCopy
+              draft={draft}
+              onFill={(out) =>
+                setDraft((d) => ({
+                  ...d,
+                  name: d.name || out.name,
+                  scent: out.scent || d.scent,
+                  blurb: out.blurb || d.blurb,
+                  badge: d.badge || out.badge,
+                }))
+              }
+            />
+          </div>
           <Field label="Collection" id="p-collection" error={errors.collection}>
             <Select id="p-collection" value={draft.collection} invalid={errors.collection} onChange={set('collection')}>
               <option value="">Select one</option>

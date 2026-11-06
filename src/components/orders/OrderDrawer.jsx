@@ -14,6 +14,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext.jsx'
 import { useSettings } from '../../hooks/useSettings.js'
 import { refundOrder, bookShipment } from '../../api/ops.js'
 import { normaliseOrder } from '../../api/endpoints.js'
+import { OrderAssistant } from '../ai/AiTools.jsx'
 
 const COURIERS = ['Delhivery', 'Shiprocket', 'Bluedart', 'DTDC', 'India Post', 'Other']
 
@@ -169,6 +170,22 @@ export default function OrderDrawer({ order, onClose, onSaved }) {
               />
             </Field>
           </div>
+        )}
+
+        {!closed && (
+          <OrderAssistant
+            order={order}
+            onVoiceUpdate={(u) => {
+              // Fill the form only — the owner still reviews and presses Save.
+              if (u.orderNumber && u.orderNumber !== order.reference) {
+                toast(`That sounded like ${u.orderNumber}, not ${order.reference} — nothing changed`, 'error')
+                return
+              }
+              if (u.status) setStatus(u.status === 'cancelled' ? order.status : u.status)
+              if (u.courier) setCourier(u.courier)
+              if (u.trackingNumber) setTracking(u.trackingNumber)
+            }}
+          />
         )}
 
         <div className="rule my-6" />

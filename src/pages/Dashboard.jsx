@@ -8,12 +8,15 @@ import OrderDrawer from '../components/orders/OrderDrawer.jsx'
 import Skeleton from '../components/ui/Skeleton.jsx'
 import ErrorNotice from '../components/ui/ErrorNotice.jsx'
 import { fetchDashboard } from '../api/stats.js'
+import { WeeklySummary } from '../components/ai/AiTools.jsx'
+import { useAdminAuth } from '../context/AdminAuthContext.jsx'
 import { rupees } from '../lib/format.js'
 
 export default function Dashboard() {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [open, setOpen] = useState(null)
+  const { staff } = useAdminAuth()
 
   const load = useCallback(() => {
     setError('')
@@ -50,6 +53,11 @@ export default function Dashboard() {
   return (
     <>
       <PageHeader title="Dashboard" subtitle="Last 14 days" />
+      {staff?.role === 'admin' && (
+        <div className="mb-6">
+          <WeeklySummary />
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Revenue" value={rupees(stats.revenue)} sub={`${stats.orderCount} orders`} />

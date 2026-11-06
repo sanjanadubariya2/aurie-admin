@@ -9,6 +9,8 @@ const items = [
   { to: '/quotes', label: 'Requests', d: 'M3 3h12v9H8l-4 3v-3H3V3Zm3 4h6M6 9.5h4' },
   { to: '/products', label: 'Products', d: 'M9 2l7 4v8l-7 4-7-4V6l7-4Zm0 0v16M2 6l7 4 7-4' },
   { to: '/materials', label: 'Materials', d: 'M3 6h12v9H3V6Zm2-3h8l2 3H3l2-3Zm2 7h4' },
+  { to: '/reviews', label: 'Reviews', d: 'M9 2l2.2 4.6 5 .7-3.6 3.5.9 5L9 13.4l-4.5 2.4.9-5L1.8 7.3l5-.7L9 2Z' },
+  { to: '/coupons', label: 'Discounts', owner: true, d: 'M3 3h6l7 7-6 6-7-7V3Zm3.5 3.5h.01' },
   { to: '/customers', label: 'Customers', owner: true, d: 'M6.5 8a2.5 2.5 0 100-5 2.5 2.5 0 000 5ZM2 15c0-2.5 2-4 4.5-4S11 12.5 11 15M12 4.5a2.3 2.3 0 010 4.5M13.5 11c1.6.4 2.5 1.8 2.5 4' },
   { to: '/team', label: 'Team', owner: true, d: 'M9 9a3 3 0 100-6 3 3 0 000 6Zm-5 7c0-3 2.2-5 5-5s5 2 5 5' },
   { to: '/security', label: 'Security', d: 'M9 2l6 2.5v4.5c0 4-2.6 6.6-6 8-3.4-1.4-6-4-6-8V4.5L9 2Zm-2.5 7.5L8.5 11.5l3-3.5' },
